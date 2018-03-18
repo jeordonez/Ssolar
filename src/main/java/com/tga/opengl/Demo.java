@@ -2,13 +2,8 @@ package com.tga.opengl;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import org.lwjgl.glfw.*;
@@ -16,9 +11,7 @@ import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-
 import java.nio.IntBuffer;
-
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -44,69 +37,20 @@ public class Demo {
     private long window;
     int VAO, VBO, VBO2, VBO3, EBO, indices;
     float angle = 0.0f;
+    int textureIDSol, textureIDT, textureIDL;
 
-    ShaderProgram shaderProgram;                                                                              //aspectratio
-        Matrix4f projection = new Matrix4f();
-        Matrix4f view = new Matrix4f(); // identity() not necesary because Matrix4f() generated a identitiy matrix
-        Matrix4f model = new Matrix4f(); 
-        
-        int textureID;
-//        ClassLoader classLoader = getClass().getClassLoader();
-
-        String fragmentShaderSource = "#version 330 core\n"
-        + "out vec4 fragColor;\n"
-        + "in vec3 fragPos;\n"
-        + "in vec3 Normal;\n"
-        + "in vec2 UV;\n"
-        + "uniform vec3 lightPos;\n"
-        + "uniform vec3 viewPos;"
-        + "uniform vec3 lightColor;\n"
-//        + "uniform vec3 objectColor;\n"
-        + "uniform sampler2D diffuseTex;\n"
-        + "const float ambientStrength = 0.3;\n"
-        + "void main() {\n"
-        + "// ambient\n"
-        + " vec3 ambient = ambientStrength * lightColor;\n"
-                
-        + " // diffuse\n"
-        + "vec3 norm = normalize(Normal);\n"
-        + "vec3 lightDir = normalize(lightPos - fragPos);\n"
-        + "float diff = max(dot(norm, lightDir), 0.0);\n"
-        + "vec3 diffuse = diff * lightColor;\n"
-        
-//        + "//Specular\n" 
-//        + "float specularStrength = 0.7;\n"
-//        + "vec3 viewDir = normalize(viewPos - fragPos);\n"
-//        + "vec3 reflectDir = reflect(-lightDir, norm);\n"
-//        + "float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);\n"
-//        + "vec3 specular = specularStrength * spec * lightColor;\n"
-        
-        //+ "vec3 result = (ambient + diffuse + specular) * vec3(1.0, 1.0, 1.0);\n"               
-        + "vec3 result = (ambient + diffuse) * texture(diffuseTex, UV).rgb;\n"
-        //+ "vec3 result = (ambient + diffuse + specular) * texture(diffuseTex, UV).rgb;\n"
-        
-        + "fragColor = vec4(result, 1.0);\n"
-        + "}";
-
-        String vertexShaderSource = "#version 330 core\n"
-        + "out vec3 fragPos;"                  
-        + "layout (location = 0) in vec3 aPos;\n"
-        + "layout (location = 1) in vec3 aNormal;\n"
-        + "layout (location = 2) in vec2 aTexCoord;\n"
-        + "uniform mat4 projection;\n"
-        + "uniform mat4 view;\n"
-        + "uniform mat4 model;\n"
-        + "out vec3 Normal;\n"
-        + "out vec2 UV;\n"
-        + "void main()\n"
-        + "{\n"
-        + " gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-        + " Normal = aNormal;\n"
-        + " UV = aTexCoord;\n"
-        + "fragPos = vec3(model * vec4(aPos, 1.0));"
-        + " //Normal = normalMatrix * aNormal;\n"
-        + "}";
-
+    ShaderProgram shaderProgramSol;                                                                              //aspectratio
+    Matrix4f projection = new Matrix4f();
+    Matrix4f view = new Matrix4f(); // identity() not necesary because Matrix4f() generated a identitiy matrix
+    Matrix4f modelSol = new Matrix4f(); 
+    
+    
+    ShaderProgram shaderProgramT;
+    Matrix4f modelT = new Matrix4f(); 
+    
+    ShaderProgram shaderProgramL;
+    Matrix4f modelL = new Matrix4f();
+    
     public void run() throws Exception {
         init();
         
@@ -179,47 +123,106 @@ public class Demo {
                 MemoryUtil.memFree(indicesBuffer); // Destroy auxiliar buffer.
             }
         }
-        shaderProgram = new ShaderProgram();
-	shaderProgram.createVertexShader(vertexShaderSource);
-	shaderProgram.createFragmentShader(fragmentShaderSource);
-	shaderProgram.link();
-        shaderProgram.createUniform("projection");
-        shaderProgram.createUniform("view");
-        shaderProgram.createUniform("model");
         
-        shaderProgram.createUniform("lightColor");
-        shaderProgram.createUniform("lightPos");
-//        shaderProgram.createUniform("objectColor");
-
+        shaderProgramSol = new ShaderProgram();
+//	shaderProgram.createShader("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertSol.glsl",ARBVertexShader.GL_VERTEX_SHADER_ARB);
+//	shaderProgram.createShader("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragSol.glsl", ARBFragmentShader.GL_FRAGMENT_SHADER_ARB);
+	shaderProgramSol.createVertexShader(vertexShaderSourceSol);
+	shaderProgramSol.createFragmentShader(fragmentShaderSourceSol);
+        shaderProgramSol.link();
+        shaderProgramSol.createUniform("projection");
+        shaderProgramSol.createUniform("view");
+        shaderProgramSol.createUniform("model");
+        shaderProgramSol.createUniform("lightColor");
+        shaderProgramSol.createUniform("lightPos");
         projection.perspective( (float) Math.toRadians(60.0f), 600.0f/600.0f, 0.001f, 1000.0f);
         view.setTranslation(new Vector3f(0.0f, 0.0f, -4.0f));             
-        model.identity();//.translate(new Vector3f(0.0f, 1.0f, 0.0f)).rotate(angle, new Vector3f(1.0f, 0.0f, 0.0f));
-
+        //angle += glfwGetTime();
+            //angle += 1;
+        //modelSol.identity().translate(new Vector3f(0.0f, 0.0f, 0.0f)).rotate((float)Math.toRadians(angle), new Vector3f(0.0f, 1.0f, 0.0f));    
+        modelSol.identity();//.translate(new Vector3f(0.0f, 1.0f, 0.0f)).rotate(angle, new Vector3f(1.0f, 0.0f, 0.0f));
         
-            InputStream in = new FileInputStream("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\sun.png");
-//          InputStream in = new FileInputStream(classLoader.getResource("Mario.png").getFile());
-            PNGDecoder decoder = new PNGDecoder(in);
-            System.out.println("width=" + decoder.getWidth());
-            System.out.println("height=" + decoder.getHeight());
-            ByteBuffer buf = ByteBuffer.allocateDirect(4*decoder.getWidth()*decoder.getHeight());
-            decoder.decode(buf, decoder.getWidth()*4, Format.RGBA);
-            buf.flip();
-            textureID = glGenTextures();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, textureID); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-            // set the texture wrapping parameters
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.getWidth(),
-            decoder.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glGenerateMipmap(GL_TEXTURE_2D);  
+        
+        shaderProgramT = new ShaderProgram();
+//	shaderProgram.createShader("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertSol.glsl",ARBVertexShader.GL_VERTEX_SHADER_ARB);
+//	shaderProgram.createShader("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragSol.glsl", ARBFragmentShader.GL_FRAGMENT_SHADER_ARB);
+	shaderProgramT.createVertexShader(vertexShaderSourceT);
+	shaderProgramT.createFragmentShader(fragmentShaderSourceT);
+        shaderProgramT.link();
+        shaderProgramT.createUniform("projection");
+        shaderProgramT.createUniform("view");
+        shaderProgramT.createUniform("model");
+        shaderProgramT.createUniform("lightColor");
+        shaderProgramT.createUniform("lightPos");
+//        projection.perspective( (float) Math.toRadians(90.0f), 600.0f/600.0f, 0.001f, 1000.0f);
+//        view.setTranslation(new Vector3f(0.0f, 0.0f, -4.0f));             
+        //angle += glfwGetTime();
+        //angle += 1;
+        //modelT.identity(); //.translate(new Vector3f(1.0f, 0.0f, 1.0f));    
+        //modelT.identity();//.translate(new Vector3f(0.0f, 1.0f, 0.0f)).rotate(angle, new Vector3f(1.0f, 0.0f, 0.0f));
+        
+        
+        
+        
+        shaderProgramL = new ShaderProgram();
+//	shaderProgram.createShader("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertSol.glsl",ARBVertexShader.GL_VERTEX_SHADER_ARB);
+//	shaderProgram.createShader("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragSol.glsl", ARBFragmentShader.GL_FRAGMENT_SHADER_ARB);
+	shaderProgramL.createVertexShader(vertexShaderSourceL);
+	shaderProgramL.createFragmentShader(fragmentShaderSourceL);
+        shaderProgramL.link();
+        shaderProgramL.createUniform("projection");
+        shaderProgramL.createUniform("view");
+        shaderProgramL.createUniform("model");
+        shaderProgramL.createUniform("lightColor");
+        shaderProgramL.createUniform("lightPos");
+//        projection.perspective( (float) Math.toRadians(90.0f), 600.0f/600.0f, 0.001f, 1000.0f);
+//        view.setTranslation(new Vector3f(0.0f, 0.0f, -4.0f));             
+        //angle += glfwGetTime();
+            //angle += 1;
+        //modelL.identity().translate(new Vector3f(1.0f, 0.0f, 2.0f));    
+        //modelL.identity();//.translate(new Vector3f(0.0f, 1.0f, 0.0f)).rotate(angle, new Vector3f(1.0f, 0.0f, 0.0f));
+        
+        
+       
+        
+        
+        
+        
+        
+        InputStream in = new FileInputStream("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\sun.png");
+        PNGDecoder decoder = new PNGDecoder(in);
+        ByteBuffer buf = ByteBuffer.allocateDirect(4*decoder.getWidth()*decoder.getHeight());
+        decoder.decode(buf, decoder.getWidth()*4, Format.RGBA);
+        buf.flip();
+        textureIDSol = glGenTextures();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureIDSol); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+        // set the texture wrapping parameters
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.getWidth(), decoder.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glGenerateMipmap(GL_TEXTURE_2D); 
+        
+        
+//        InputStream inT = new FileInputStream("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\earth_clouds.png");
+//        PNGDecoder decoderT = new PNGDecoder(inT);
+//        ByteBuffer bufT = ByteBuffer.allocateDirect(4*decoderT.getWidth()*decoderT.getHeight());
+//        decoderT.decode(bufT, decoderT.getWidth()*4, Format.RGBA);
+//        bufT.flip();
+//        textureIDT = glGenTextures();
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, textureIDT); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+//         
+//        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoderT.getWidth(), decoderT.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, bufT);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//        glGenerateMipmap(GL_TEXTURE_2D); 
+//        
 
         loop();
-
         // Libera las devoluciones de llamada de la ventana y destruye la ventana
         glfwFreeCallbacks(window);
         glfwDestroyWindow(window);
-
         // Terminate GLFW and free the error callback
         glfwTerminate();
         glfwSetErrorCallback(null).free();
@@ -262,6 +265,7 @@ public class Demo {
                 view.getTranslation(translation);
                 translation.z -= 0.1f;
                 view = view.setTranslation(translation);
+                
                 System.out.println(translation.z);
             }
             if (key == GLFW_KEY_A) {
@@ -335,39 +339,55 @@ public class Demo {
         //glEnable(GL_BLEND);
         
         while (!glfwWindowShouldClose(window)) {
-
-            // Poll for window events. The key callback above will only be
-            // invoked during this call.
+            angle += 1;
             glfwPollEvents();
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            shaderProgram.setUniform("projection", projection);
-            shaderProgram.setUniform("view", view);
             
-            shaderProgram.setUniform("lightColor", 1.0f,1.0f,1.0f);
-            shaderProgram.setUniform("lightPos", 1.2f, 2.0f, 2.0f);
+            
+            shaderProgramSol.bind();
+            shaderProgramSol.setUniform("projection", projection);
+            shaderProgramSol.setUniform("view", view);
+            shaderProgramSol.setUniform("lightColor", 1.0f,1.0f,1.0f);
+            shaderProgramSol.setUniform("lightPos", 0.0f, 0.0f, 0.0f);
+            shaderProgramSol.setUniform("model", modelSol);
+            glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_INT, 0); // 12*3 los índices comienzan en 0 -> 12 triángulos -> 6 cuadrados
+            
+            
+            shaderProgramT.bind();
+            shaderProgramT.setUniform("projection", projection);
+            shaderProgramT.setUniform("view", view);
+            shaderProgramT.setUniform("lightColor", 1.0f,1.0f,1.0f);
+            shaderProgramT.setUniform("lightPos", 0.0f, 0.0f, 0.0f);
+            shaderProgramT.setUniform("model", modelT);
+            glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_INT, 0); // 12*3 los índices comienzan en 0 -> 12 triángulos -> 6 cuadrados
+            //angle += glfwGetTime();
+            angle += 0.2;
+            modelT.identity().scale(0.5f).translate(new Vector3f(2.0f, 0.0f, 3.0f)).rotate(angle, new Vector3f(1.0f, 0.0f, 0.0f));
+        
+//            modelT.identity().translate(new Vector3f(1.0f, 0.0f, 1.0f)).rotate((float)Math.toRadians(angle), new Vector3f(0.0f, 1.0f, 0.0f));
+            //modelT.scale(0.1f);
+            //modelT.identity().translate(new Vector3f(1.0f, 0.0f, 1.0f)).rotate((float)Math.toRadians(angle), new Vector3f(1.0f, 0.0f, 0.0f));    
+            //modelT.identity().translate(new Vector3f(1.0f, 0.0f, 1.0f)).rotate((float)Math.toRadians(angle), new Vector3f(1.0f, 0.0f, 0.0f));    
+
+            shaderProgramL.bind();
+            shaderProgramL.setUniform("projection", projection);
+            shaderProgramL.setUniform("view", view);
+            shaderProgramL.setUniform("lightColor", 1.0f,1.0f,1.0f);
+            shaderProgramL.setUniform("lightPos", 0.0f, 0.0f, 0.0f);
+            shaderProgramL.setUniform("model", modelL);
+            glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_INT, 0);
+            modelL.identity().scale(0.3f).translate(new Vector3f(6.0f, 0.0f, 8.0f)).rotate(angle, new Vector3f(1.0f, 0.0f, 0.0f));
+       
+            //modelL.identity().translate(new Vector3f(1.0f, 0.0f, 2.0f)).rotate((float)Math.toRadians(angle), new Vector3f(1.0f, 0.0f, 0.0f));
+
 //            shaderProgram.setUniform("objectColor", 0.0f,0.0f,0.0f);
             
             //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            // render
-            // ------
-            
-            //Textura     
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, textureID);
-            
-     
             glBindVertexArray(VAO);
-//          Rotacion acumulada cubo
-            //angle += glfwGetTime();
-            //angle += 1;
-            model.identity().translate(new Vector3f(0.0f, 0.0f, 0.0f)).rotate((float)Math.toRadians(angle), new Vector3f(0.0f, 1.0f, 0.0f));
-            
-            shaderProgram.setUniform("model", model);
-            shaderProgram.bind(); 
+
             //glDrawArrays(GL_TRIANGLES, 0, 3);
-            glDrawElements(GL_TRIANGLES, indices, GL_UNSIGNED_INT, 0); // 12*3 los índices comienzan en 0 -> 12 triángulos -> 6 cuadrados
-            // glBindVertexArray(0); // no need to unbind it every time
+           // glBindVertexArray(0); // no need to unbind it every time
             glfwSwapBuffers(window); // swap the color buffers
         }
     }
@@ -375,5 +395,175 @@ public class Demo {
     public static void main(String[] args) throws Exception {
         new Demo().run();
     }
+    
+    
+    
+    
+   
+    
+    String fragmentShaderSourceSol = "#version 330 core\n"
+        + "out vec4 fragColor;\n"
+        + "in vec3 fragPos;\n"
+        + "in vec3 Normal;\n"
+        + "in vec2 UV;\n"
+        + "uniform vec3 lightPos;\n"
+        + "uniform vec3 viewPos;"
+        + "uniform vec3 lightColor;\n"
+//        + "uniform vec3 objectColor;\n"
+        + "uniform sampler2D diffuseTex;\n"
+        + "const float ambientStrength = 0.3;\n"
+        + "void main() {\n"
+        + "// ambient\n"
+        + " vec3 ambient = ambientStrength * lightColor;\n"
+                
+        + " // diffuse\n"
+        + "vec3 norm = normalize(Normal);\n"
+        + "vec3 lightDir = normalize(lightPos - fragPos);\n"
+        + "float diff = max(dot(norm, lightDir), 0.0);\n"
+        + "vec3 diffuse = diff * lightColor;\n"
+        
+//        + "//Specular\n" 
+//        + "float specularStrength = 0.5;\n"
+//        + "vec3 viewDir = normalize(viewPos - fragPos);\n"
+//        + "vec3 reflectDir = reflect(-lightDir, norm);\n"
+//        + "float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);\n"
+//        + "vec3 specular = specularStrength * spec * lightColor;\n"
+//        
+        //+ "vec3 result = (ambient + diffuse + specular) * vec3(1.0, 1.0, 1.0);\n"               
+        + "vec3 result = (ambient + diffuse) * texture(diffuseTex, UV).rgb;\n"
+        //+ "vec3 result = (ambient + diffuse + specular) * texture(diffuseTex, UV).rgb;\n"
+        + "fragColor = vec4(result, 1.0);\n"
+        + "}";
 
+        String vertexShaderSourceSol = "#version 330 core\n"
+        + "out vec3 fragPos;"                  
+        + "layout (location = 0) in vec3 aPos;\n"
+        + "layout (location = 1) in vec3 aNormal;\n"
+        + "layout (location = 2) in vec2 aTexCoord;\n"
+        + "uniform mat4 projection;\n"
+        + "uniform mat4 view;\n"
+        + "uniform mat4 model;\n"
+        + "out vec3 Normal;\n"
+        + "out vec2 UV;\n"
+        + "void main()\n"
+        + "{\n"
+        + " gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+        + " //Normal = aNormal;\n"
+        + " UV = aTexCoord;\n"
+        + "fragPos = vec3(model * vec4(aPos, 1.0));"
+        + " mat3 normalMatrix = transpose(inverse(mat3(model)));\n"
+        + " Normal = normalMatrix * aNormal;\n"
+        + "}";
+        
+        String fragmentShaderSourceT = "#version 330 core\n"
+        + "out vec4 fragColor;\n"
+        + "in vec3 fragPos;\n"
+        + "in vec3 Normal;\n"
+        + "in vec2 UV;\n"
+        + "uniform vec3 lightPos;\n"
+        + "uniform vec3 viewPos;"
+        + "uniform vec3 lightColor;\n"
+//        + "uniform vec3 objectColor;\n"
+        + "uniform sampler2D diffuseTex;\n"
+        + "const float ambientStrength = 0.3;\n"
+        + "void main() {\n"
+        + "// ambient\n"
+        + " vec3 ambient = ambientStrength * lightColor;\n"
+                
+        + " // diffuse\n"
+        + "vec3 norm = normalize(Normal);\n"
+        + "vec3 lightDir = normalize(lightPos - fragPos);\n"
+        + "float diff = max(dot(norm, lightDir), 0.0);\n"
+        + "vec3 diffuse = diff * lightColor;\n"
+        
+//        + "//Specular\n" 
+//        + "float specularStrength = 0.5;\n"
+//        + "vec3 viewDir = normalize(viewPos - fragPos);\n"
+//        + "vec3 reflectDir = reflect(-lightDir, norm);\n"
+//        + "float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);\n"
+//        + "vec3 specular = specularStrength * spec * lightColor;\n"
+//        
+        //+ "vec3 result = (ambient + diffuse + specular) * vec3(1.0, 1.0, 1.0);\n" 
+        + "vec3 result = (ambient + diffuse) * vec3(1.0, 1.0, 1.0);\n" 
+        //+ "vec3 result = (ambient + diffuse) * texture(diffuseTex, UV).rgb;\n"
+        //+ "vec3 result = (ambient + diffuse + specular) * texture(diffuseTex, UV).rgb;\n"
+        + "fragColor = vec4(result, 1.0);\n"
+        + "}";
+
+        String vertexShaderSourceT = "#version 330 core\n"
+        + "out vec3 fragPos;"                  
+        + "layout (location = 0) in vec3 aPos;\n"
+        + "layout (location = 1) in vec3 aNormal;\n"
+        + "layout (location = 2) in vec2 aTexCoord;\n"
+        + "uniform mat4 projection;\n"
+        + "uniform mat4 view;\n"
+        + "uniform mat4 model;\n"
+        + "out vec3 Normal;\n"
+        + "out vec2 UV;\n"
+        + "void main()\n"
+        + "{\n"
+        + " gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+        + " //Normal = aNormal;\n"
+        + " UV = aTexCoord;\n"
+        + "fragPos = vec3(model * vec4(aPos, 1.0));"
+        + " mat3 normalMatrix = transpose(inverse(mat3(model)));\n"
+        + " Normal = normalMatrix * aNormal;\n"
+        + "}";
+        
+        
+        
+        String fragmentShaderSourceL = "#version 330 core\n"
+        + "out vec4 fragColor;\n"
+        + "in vec3 fragPos;\n"
+        + "in vec3 Normal;\n"
+        + "in vec2 UV;\n"
+        + "uniform vec3 lightPos;\n"
+        + "uniform vec3 viewPos;"
+        + "uniform vec3 lightColor;\n"
+//        + "uniform vec3 objectColor;\n"
+        + "uniform sampler2D diffuseTex;\n"
+        + "const float ambientStrength = 0.3;\n"
+        + "void main() {\n"
+        + "// ambient\n"
+        + " vec3 ambient = ambientStrength * lightColor;\n"
+                
+        + " // diffuse\n"
+        + "vec3 norm = normalize(Normal);\n"
+        + "vec3 lightDir = normalize(lightPos - fragPos);\n"
+        + "float diff = max(dot(norm, lightDir), 0.0);\n"
+        + "vec3 diffuse = diff * lightColor;\n"
+        
+//        + "//Specular\n" 
+//        + "float specularStrength = 0.5;\n"
+//        + "vec3 viewDir = normalize(viewPos - fragPos);\n"
+//        + "vec3 reflectDir = reflect(-lightDir, norm);\n"
+//        + "float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);\n"
+//        + "vec3 specular = specularStrength * spec * lightColor;\n"
+//        
+        //+ "vec3 result = (ambient + diffuse + specular) * vec3(0.0, 1.0, 0.0);\n"
+        + "vec3 result = (ambient + diffuse) * vec3(0.0, 1.0, 0.0);\n" 
+        //+ "vec3 result = (ambient + diffuse) * texture(diffuseTex, UV).rgb;\n"
+        //+ "vec3 result = (ambient + diffuse + specular) * texture(diffuseTex, UV).rgb;\n"
+        + "fragColor = vec4(result, 1.0);\n"
+        + "}";
+
+        String vertexShaderSourceL = "#version 330 core\n"
+        + "out vec3 fragPos;"                  
+        + "layout (location = 0) in vec3 aPos;\n"
+        + "layout (location = 1) in vec3 aNormal;\n"
+        + "layout (location = 2) in vec2 aTexCoord;\n"
+        + "uniform mat4 projection;\n"
+        + "uniform mat4 view;\n"
+        + "uniform mat4 model;\n"
+        + "out vec3 Normal;\n"
+        + "out vec2 UV;\n"
+        + "void main()\n"
+        + "{\n"
+        + " gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+        + " //Normal = aNormal;\n"
+        + " UV = aTexCoord;\n"
+        + "fragPos = vec3(model * vec4(aPos, 1.0));"
+        + " mat3 normalMatrix = transpose(inverse(mat3(model)));\n"
+        + " Normal = normalMatrix * aNormal;\n"
+        + "}";
 }
