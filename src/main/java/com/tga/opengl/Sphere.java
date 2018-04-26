@@ -60,7 +60,7 @@ public class Sphere {
                 
                 // TexCoord 
                 texCoords.add( u );
-                float v1 = (float) (1.0 - v);
+                float v1 = (float) (1.0 + v);
                 texCoords.add(v1);
                 verticesRow.add( idx++ );
 
