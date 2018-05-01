@@ -131,10 +131,10 @@ public class Demo {
         
         /*Creación del Shader del Sol*/
         shaderProgramSol = new ShaderProgram();
-//        shaderProgramSol.createVertexShader(leerFile("vertSol.glsl"));
-//        shaderProgramSol.createFragmentShader(leerFile("fragSol.glsl"));
-        shaderProgramSol.createVertexShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertSol.glsl"));
-	shaderProgramSol.createFragmentShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragSol.glsl"));
+        shaderProgramSol.createVertexShader(leerFile("vertSol.glsl"));
+        shaderProgramSol.createFragmentShader(leerFile("fragSol.glsl"));
+//        shaderProgramSol.createVertexShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertSol.glsl"));
+//	shaderProgramSol.createFragmentShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragSol.glsl"));
         shaderProgramSol.link();
         shaderProgramSol.createUniform("projection");
         shaderProgramSol.createUniform("view");
@@ -145,10 +145,10 @@ public class Demo {
         
         /*Creación del Shader de la Tierra*/
         shaderProgramT = new ShaderProgram();
-//	shaderProgramT.createVertexShader(leerFile("vertT.glsl"));
-//	shaderProgramT.createFragmentShader(leerFile("fragT.glsl"));
-        shaderProgramT.createVertexShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertT.glsl"));
-        shaderProgramT.createFragmentShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragT.glsl"));
+	shaderProgramT.createVertexShader(leerFile("vertT.glsl"));
+	shaderProgramT.createFragmentShader(leerFile("fragT.glsl"));
+//      shaderProgramT.createVertexShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertT.glsl"));
+//      shaderProgramT.createFragmentShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragT.glsl"));
         shaderProgramT.link();
         shaderProgramT.createUniform("projection");
         shaderProgramT.createUniform("view");
@@ -160,10 +160,10 @@ public class Demo {
 
         /*Creación del Shader de la Luna*/
         shaderProgramL = new ShaderProgram();
-//	shaderProgramL.createVertexShader(leerFile("vertT.glsl"));
-//	shaderProgramL.createFragmentShader(leerFile("fragT.glsl"));
-        shaderProgramL.createVertexShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertT.glsl"));
-        shaderProgramL.createFragmentShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragT.glsl"));
+	shaderProgramL.createVertexShader(leerFile("vertT.glsl"));
+	shaderProgramL.createFragmentShader(leerFile("fragT.glsl"));
+//        shaderProgramL.createVertexShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\vertT.glsl"));
+//        shaderProgramL.createFragmentShader(leerFile("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\fragT.glsl"));
         shaderProgramL.link();
         shaderProgramL.createUniform("projection");
         shaderProgramL.createUniform("view");
@@ -174,12 +174,12 @@ public class Demo {
         shaderProgramL.createUniform("diffuseTexture");
         
         /*Carga de las texturas*/
-//      textureIDSol = cargaTex("sun.png", textureIDSol);
-//      textureIDT = cargaTex("earth.png", textureIDT);
-//      textureIDL = cargaTex("moon.png", textureIDL);
-        textureIDSol = cargaTex("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\sun.png", textureIDSol);
-        textureIDT = cargaTex("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\earth.png", textureIDT);
-        textureIDL = cargaTex("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\moon.png", textureIDL);
+        textureIDSol = cargaTex("sun.png", textureIDSol);
+        textureIDT = cargaTex("earth.png", textureIDT);
+        textureIDL = cargaTex("moon.png", textureIDL);
+//        textureIDSol = cargaTex("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\sun.png", textureIDSol);
+//        textureIDT = cargaTex("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\earth.png", textureIDT);
+//        textureIDL = cargaTex("E:\\Master\\TAG\\SistemaSolar\\Ssolar\\src\\main\\java\\com\\tga\\opengl\\moon.png", textureIDL);
 
 
         loop();
